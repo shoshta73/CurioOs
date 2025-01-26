@@ -1,0 +1,63 @@
+# Genral options
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+ColumnLimit: 0
+AccessModifierOffset: -4
+AlignArrayOfStructures: Right
+SortIncludes: false
+
+# indentation
+IndentCaseBlocks: false
+IndentCaseLabels: true
+
+# Qualifiers
+QualifierOrder: [constexpr, inline, static, type, const, volatile]
+
+# Pointer alignment and references
+DerivePointerAlignment: false
+PointerAlignment: Right
+ReferenceAlignment: Right
+
+# Braces
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: true
+  BeforeWhile: true
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: false
+
+# Breaks
+BreakAdjacentStringLiterals: true
+BreakAfterAttributes: Always
+BreakBeforeConceptDeclarations: true
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: AfterColon
+BreakTemplateDeclarations: Yes
+
+# Namespaces
+CompactNamespaces: true
+FixNamespaceComments: true
+NamespaceIndentation: All
+ShortNamespaceLines: 0
+WrapNamespaceBodyWithEmptyLines: Always
+
+# Empty lines
+MaxEmptyLinesToKeep: 1
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: Always
