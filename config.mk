@@ -1,5 +1,5 @@
-ARCH := i386
-# ARCH := x86_64
+# ARCH := i386
+ARCH := x86_64
 
 CC = gcc
 NASM = nasm

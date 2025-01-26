@@ -29,8 +29,8 @@ kernel.bin: $(KERNEL_OBJS) $(ASM_OBJS)
 # Create ISO
 $(TARGET): kernel.bin
 	mkdir -p iso/boot/grub
-	cp kernel.bin iso/boot/
-	cp grub.cfg iso/boot/grub/
+	cp -v kernel.bin iso/boot/
+	cp -fv build/$(ARCH)/grub.cfg iso/boot/grub/
 	grub-mkrescue -o $@ iso
 
 # Clean

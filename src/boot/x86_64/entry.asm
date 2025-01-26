@@ -1,167 +1,142 @@
-; 64-bit Multiboot2 Bootloader
-
+; Bootloader for x86_64 with Multiboot2 support
 global _start
 extern kernel_main
 
-; Multiboot2 header constants
-MULTIBOOT2_MAGIC        equ 0xE85250D6
-MULTIBOOT2_ARCH_I386    equ 0
-MULTIBOOT2_LENGTH       equ multiboot2_header_end - multiboot2_header_start
-MULTIBOOT2_CHECKSUM     equ -(MULTIBOOT2_MAGIC + MULTIBOOT2_ARCH_I386 + MULTIBOOT2_LENGTH)
-
-; Page table and memory management constants
-PAGE_PRESENT    equ 1 << 0
-PAGE_WRITE      equ 1 << 1
-PAGE_USER       equ 1 << 2
-PAGE_SIZE       equ 1 << 7
-
 section .multiboot2_header
-multiboot2_header_start:
-    dd MULTIBOOT2_MAGIC
-    dd MULTIBOOT2_ARCH_I386
-    dd MULTIBOOT2_LENGTH
-    dd MULTIBOOT2_CHECKSUM
+align 8
+header_start:
+    dd 0xe85250d6                ; Multiboot2 magic number
+    dd 0                         ; Architecture (i386)
+    dd header_end - header_start ; Header length
+    ; Checksum
+    dd 0x100000000 - (0xe85250d6 + 0 + (header_end - header_start))
 
-    ; Multiboot2 tags (optional)
-    ; Framebuffer tag
-    dw 5      ; type
-    dw 0      ; flags
-    dd 20     ; size
-    dd 1024   ; width
-    dd 768    ; height
-    dd 32     ; depth
+    ; Required end tag
+    dw 0    ; Type
+    dw 0    ; Flags
+    dd 8    ; Size
+header_end:
 
-    ; End tag
-    dw 0      ; type
-    dw 0      ; flags
-    dd 8      ; size
-multiboot2_header_end:
-
+; Page table entries
 section .bss
-    ; Page tables
-    align 4096
-pml4:
+align 4096
+p4_table:
     resb 4096
-pdp:
+p3_table:
     resb 4096
-pd:
+p2_table:
     resb 4096
-pt:
-    resb 4096
-
-    ; Stack
-    stack_bottom:
-    resb 16384
+stack_bottom:
+    resb 16384  ; 16 KB stack
 stack_top:
 
-section .data
-    ; Global Descriptor Table
-gdt64:
-    .null: equ $ - gdt64
-        dq 0
-    .code: equ $ - gdt64
-        dq 0x00209A0000000000 ; Long mode code segment
-    .data: equ $ - gdt64
-        dq 0x0000920000000000 ; Data segment
-    .end: equ $ - gdt64
-
-    ; GDT descriptor
-gdt64_descriptor:
-    dw gdt64.end - gdt64 - 1
-    dq gdt64
-
 section .text
-global _start
+bits 32
 _start:
-    ; Disable interrupts
-    cli
+    ; Setup stack
+    mov esp, stack_top
 
-    ; Check multiboot2 magic
-    cmp eax, 0x36d76289
-    jne .error
+    ; Store multiboot info
+    push ebx    ; Multiboot info pointer
+    push eax    ; Multiboot magic value
 
-    ; Setup page tables
-    call setup_page_tables
-    call enable_paging
-
-    ; Load 64-bit GDT
-    lgdt [gdt64_descriptor]
-
-    ; Far jump to 64-bit code
-    jmp gdt64.code:long_mode_start
-
-; Page table setup
-setup_page_tables:
     ; Clear page tables
-    mov edi, pml4
-    mov cr3, edi
+    mov edi, p4_table
     xor eax, eax
-    mov ecx, 4096
+    mov ecx, 4096*3
     rep stosd
 
-    ; Identity map first 2MB
-    mov edi, pml4
-    mov DWORD [edi], pdp + PAGE_PRESENT + PAGE_WRITE
-    mov edi, pdp
-    mov DWORD [edi], pd + PAGE_PRESENT + PAGE_WRITE
-    mov edi, pd
-    mov DWORD [edi], pt + PAGE_PRESENT + PAGE_WRITE
+    ; Setup page tables for identity mapping first 2MB
+    ; P4 Entry
+    mov eax, p3_table
+    or eax, 0b11    ; Present + Writable
+    mov [p4_table], eax
 
-    ; Fill page table
-    mov ecx, 512
-    mov edi, pt
-    mov esi, 0
-.map_pt_loop:
-    mov QWORD [edi], esi | PAGE_PRESENT | PAGE_WRITE
-    add esi, 0x1000
-    add edi, 8
-    loop .map_pt_loop
+    ; P3 Entry
+    mov eax, p2_table
+    or eax, 0b11    ; Present + Writable
+    mov [p3_table], eax
 
-    ret
+    ; P2 Entry - Identity map first 2MB
+    mov ecx, 0
+.map_p2:
+    mov eax, 0x200000  ; 2MB page
+    mul ecx
+    or eax, 0b10000011 ; Present + Writable + Huge
+    mov [p2_table + ecx * 8], eax
 
-; Enable paging and long mode
-enable_paging:
+    inc ecx
+    cmp ecx, 512      ; Map entire P2 (1GB)
+    jne .map_p2
+
+    ; Load P4 into CR3
+    mov eax, p4_table
+    mov cr3, eax
+
     ; Enable PAE
     mov eax, cr4
-    or eax, 1 << 5
+    or eax, 1 << 5    ; PAE bit
     mov cr4, eax
 
-    ; Enable long mode
+    ; Enable Long Mode
     mov ecx, 0xC0000080
     rdmsr
-    or eax, 1 << 8
+    or eax, 1 << 8    ; Long Mode Enable
     wrmsr
 
     ; Enable paging
     mov eax, cr0
-    or eax, 1 << 31
+    or eax, 1 << 31   ; Paging bit
+    or eax, 1         ; Protected mode bit
     mov cr0, eax
 
-    ret
+    ; Load GDT
+    lgdt [gdt64.pointer]
 
-; 64-bit Long Mode Entry Point
-[BITS 64]
-long_mode_start:
-    ; Load segment registers
+    ; Update selectors
     mov ax, gdt64.data
+    mov ss, ax
+    mov ds, ax
+    mov es, ax
+
+    ; Jump to long mode
+    jmp gdt64.code:long_mode_start
+
+bits 64
+long_mode_start:
+    ; Clear old segments
+    xor ax, ax
+    mov ss, ax
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov ss, ax
 
-    ; Setup stack
+    ; Restore multiboot info for kernel
+    pop rdi    ; Magic value
+    pop rsi    ; Info pointer
+
+    ; Set up fresh stack for 64-bit mode
     mov rsp, stack_top
 
-    ; Call kernel main
+    ; Call kernel
     call kernel_main
 
-.halt:
+    ; Kernel should not return, but if it does:
+.hang:
     cli
     hlt
-    jmp .halt
+    jmp .hang
 
-.error:
-    ; Handle multiboot2 error
-    mov al, '0'
-    jmp .halt
+section .rodata
+gdt64:
+    dq 0 ; Zero entry
+.code: equ $ - gdt64
+    ; Code segment
+    dq (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53) ; Code segment
+.data: equ $ - gdt64
+    ; Data segment
+    dq (1 << 44) | (1 << 47) | (1 << 41) ; Data segment
+.pointer:
+    dw $ - gdt64 - 1     ; Length
+    dq gdt64             ; Base
