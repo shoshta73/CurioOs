@@ -1,28 +1,7 @@
-# Makefile for Minimal OS
+include config.mk
 
-# Compiler and linker settings
-CC = gcc
-NASM = nasm
-LD = ld
+KERNEL_SRCS = src/kernel/main.c
 
-# Architecture (uncomment one)
-ARCH = i386
-# Compilation flags
-CFLAGS = -m32 -ffreestanding -O2 -Wall -Wextra
-NASMFLAGS = -f elf32
-LDFLAGS = -m elf_i386
-
-# ARCH = x86_64
-# Compilation flags
-# CFLAGS = -ffreestanding -O2 -Wall -Wextra
-# NASMFLAGS = -f elf64
-# LDFLAGS = -m elf_x86_64
-
-# Source files
-KERNEL_SRCS = kmain.c
-ASM_SRCS = boot.asm
-
-# Object files
 KERNEL_OBJS = $(KERNEL_SRCS:.c=.o)
 ASM_OBJS = $(ASM_SRCS:.asm=.o)
 
@@ -33,7 +12,7 @@ TARGET = minimal_os.iso
 all: $(TARGET)
 
 run: $(TARGET)
-	qemu-system-i386 -cdrom $<
+	qemu-system-$(ARCH) -cdrom $<
 
 # Compile C sources
 %.o: %.c
@@ -45,7 +24,7 @@ run: $(TARGET)
 
 # Link kernel
 kernel.bin: $(KERNEL_OBJS) $(ASM_OBJS)
-	$(LD) $(LDFLAGS) -T linker.ld -o $@ $^
+	$(LD) $(LDFLAGS) -o $@ $^
 
 # Create ISO
 $(TARGET): kernel.bin
@@ -56,6 +35,6 @@ $(TARGET): kernel.bin
 
 # Clean
 clean:
-	rm -rf *.o **/*.o kernel.bin iso $(TARGET)
+	rm -rfv *.o **/*.o kernel.bin iso $(TARGET)
 
 .PHONY: all clean
