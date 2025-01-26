@@ -1,12 +1,12 @@
 include config.mk
 
-KERNEL_SRCS = src/kernel/main.c
+KERNEL_SRCS = src/kernel/main.c src/drivers/vga/clear_screen.c src/drivers/vga/print_char.c src/drivers/vga/print_string.c src/drivers/vga/state.c
 
 KERNEL_OBJS = $(KERNEL_SRCS:.c=.o)
 ASM_OBJS = $(ASM_SRCS:.asm=.o)
 
 # Target
-TARGET = minimal_os.iso
+TARGET = CurioOS.iso
 
 # Default target
 all: $(TARGET)
@@ -16,7 +16,7 @@ run: $(TARGET)
 
 # Compile C sources
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # Compile assembly sources
 %.o: %.asm
@@ -35,6 +35,6 @@ $(TARGET): kernel.bin
 
 # Clean
 clean:
-	rm -rfv *.o **/*.o kernel.bin iso $(TARGET)
+	rm -rfv $(KERNEL_OBJS) $(ASM_OBJS) kernel.bin iso $(TARGET)
 
 .PHONY: all clean
