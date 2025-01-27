@@ -1,6 +1,6 @@
 include config.mk
 
-KERNEL_SRCS = src/kernel/main.c src/drivers/vga/clear_screen.c src/drivers/vga/print_char.c src/drivers/vga/print_string.c src/drivers/vga/state.c
+KERNEL_SRCS = src/kernel/main.c src/drivers/vga/clear_screen.c src/drivers/vga/print_char.c src/drivers/vga/print_string.c src/drivers/vga/state.c src/core/outb.c src/core/inb.c src/core/inw.c src/core/outw.c src/core/inl.c src/core/outl.c src/core/wait.c
 
 KERNEL_OBJS = $(KERNEL_SRCS:.c=.o)
 ASM_OBJS = $(ASM_SRCS:.asm=.o)
