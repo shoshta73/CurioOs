@@ -3,6 +3,8 @@ include config.mk
 _IO_SOURCES = $(wildcard src/core/*.c)
 _VGA_DRIVER_SOURCE = $(wildcard src/drivers/vga/*.c)
 _KERNEL_SOURCES = $(wildcard src/kernel/*.c)
+_KERNEL_SOURCES += $(wildcard src/kernel/state/*.c)
+_KERNEL_SOURCES += $(wildcard src/kernel/io/*.c)
 KERNEL_SRCS = $(_KERNEL_SOURCES) $(_VGA_DRIVER_SOURCE) $(_IO_SOURCES)
 
 KERNEL_OBJS = $(KERNEL_SRCS:.c=.o)

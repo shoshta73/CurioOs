@@ -49,8 +49,6 @@ extern vga_cursor _vga_cursor;
 void clear_screen();
 void print_char_color(char c, uint8_t color);
 void print_char(char c);
-void print_string_color(const char *str, uint8_t color);
-void print_string(const char *str);
 
 void vga_init();
 
