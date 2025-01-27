@@ -5,9 +5,13 @@
 
 void clear_screen()
 {
-    for (size_t i = 0; i < 80 * 25; i++)
+    for (uint8_t y = 0; y < VGA_HEIGHT; y++)
     {
-        vga_buffer[i] = 0;
+        for (uint8_t x = 0; x < VGA_WIDTH; x++)
+        {
+            vga_buffer[y * VGA_WIDTH + x] = 0;
+        }
     }
-    vga_index = 0;
+
+    _vga_set_cursor_xy(0, 0);
 }
