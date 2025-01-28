@@ -62,6 +62,9 @@ void outportb(unsigned short _port, unsigned char _data)
 
 int kmain()
 {
+    gdt_install();
+    idt_install();
+    isrs_install();
     init_video();
     puts("Hello world!\n");
     for (;;)
