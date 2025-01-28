@@ -66,6 +66,7 @@ int kmain()
     idt_install();
     isrs_install();
     irq_install();
+    timer_install();
     init_video();
     puts("Hello world!\n");
     for (;;)

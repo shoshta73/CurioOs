@@ -40,4 +40,9 @@ extern void irq_install();
 extern void irq_install_handler(int irq, void *handler);
 extern void irq_uninstall_handler(int irq);
 
+/* Timer */
+extern void timer_install();
+extern int timer_ticks;
+extern void timer_wait(int ticks);
+
 #endif /* __CURIOOS_SYSTEM_H */

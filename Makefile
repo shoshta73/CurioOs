@@ -12,7 +12,7 @@ iso: kernel grub.cfg
 	cp -fv grub.cfg iso/boot/grub/grub.cfg
 	grub-mkrescue -o os-image iso
 
-kernel: linker.ld src/start.o src/main.o src/vga.o src/gdt.o src/idt.o src/isrs.o src/irq.o
+kernel: linker.ld src/start.o src/main.o src/vga.o src/gdt.o src/idt.o src/isrs.o src/irq.o src/timer.o
 	$(LD) $(LD_FLAGS) src/*.o
 
 src/start.o: src/start.asm
@@ -34,6 +34,9 @@ src/isrs.o: src/isrs.c
 	$(CC) $(CC_FLAGS) $@ $<
 
 src/irq.o: src/irq.c
+	$(CC) $(CC_FLAGS) $@ $<
+
+src/timer.o: src/timer.c
 	$(CC) $(CC_FLAGS) $@ $<
 
 clean:
