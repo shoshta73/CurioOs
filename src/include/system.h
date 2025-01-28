@@ -35,4 +35,9 @@ struct regs
 
 void isrs_install();
 
+/* Interrupt Handlers */
+extern void irq_install();
+extern void irq_install_handler(int irq, void *handler);
+extern void irq_uninstall_handler(int irq);
+
 #endif /* __CURIOOS_SYSTEM_H */
