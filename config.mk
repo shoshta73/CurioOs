@@ -1,26 +1,9 @@
-# ARCH := i386
-ARCH := x86_64
+LD := ld
+LD_FLAGS := -m elf_i386 -T linker.ld -o kernel
 
-CC = gcc
-NASM = nasm
-LD = ld
-
-CC_FLAGS :=
-NASMFLAGS :=
-LDFLAGS :=
-
+CC := gcc
 CPP_FLAGS := -I./src/include
+CC_FLAGS := $(CPP_FLAGS) -m32 -ffreestanding -nostdlib -Wall -m32 -O -fstrength-reduce -fomit-frame-pointer -finline-functions -nostdinc -fno-builtin -fno-stack-protector -fno-pie -c -o
 
-ifeq ($(ARCH), i386)
-	CC_FLAGS += $(CPP_FLAGS) -m32 -ffreestanding -O2 -Wall -Wextra
-	NASMFLAGS += -f elf32
-	LDFLAGS += -m elf_i386 -T build/$(ARCH)/linker.ld
-endif
-
-ifeq ($(ARCH), x86_64)
-	CC_FLAGS += $(CPP_FLAGS)  -ffreestanding -O2 -Wall -Wextra
-	NASMFLAGS += -f elf64
-	LDFLAGS += -m elf_x86_64 -T build/$(ARCH)/linker.ld
-endif
-
-ASM_SRCS := src/boot/$(ARCH)/entry.asm
+AS := nasm
+AS_FLAGS := -f elf32 -o
