@@ -1,7 +1,10 @@
 include config.mk
 
 .PHONY: all clean
-all: kernel iso
+all: clean kernel iso
+
+.DEFAULT_GOAL := build
+build: kernel iso
 
 run: iso
 	qemu-system-x86_64 -drive file=os-image,format=raw
@@ -16,28 +19,28 @@ kernel: linker.ld src/start.o src/main.o src/vga.o src/gdt.o src/idt.o src/isrs.
 	$(LD) $(LD_FLAGS) src/*.o
 
 src/start.o: src/start.asm
-	$(AS) $(AS_FLAGS) $@ $<
+	$(compile_asm)
 
 src/main.o: src/main.c
-	$(CC) $(CC_FLAGS) $@ $<
+	$(compile_c)
 
 src/vga.o: src/vga.c
-	$(CC) $(CC_FLAGS) $@ $<
+	$(compile_c)
 
 src/gdt.o: src/gdt.c
-	$(CC) $(CC_FLAGS) $@ $<
+	$(compile_c)
 
 src/idt.o: src/idt.c
-	$(CC) $(CC_FLAGS) $@ $<
+	$(compile_c)
 
 src/isrs.o: src/isrs.c
-	$(CC) $(CC_FLAGS) $@ $<
+	$(compile_c)
 
 src/irq.o: src/irq.c
-	$(CC) $(CC_FLAGS) $@ $<
+	$(compile_c)
 
 src/timer.o: src/timer.c
-	$(CC) $(CC_FLAGS) $@ $<
+	$(compile_c)
 
 clean:
 	rm -fv kernel

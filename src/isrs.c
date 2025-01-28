@@ -72,7 +72,7 @@ void isrs_install()
     idt_set_gate(31, (unsigned)_isr31, 0x08, 0x8E);
 }
 
-unsigned char *exception_messages[] = {
+char *exception_messages[] = {
     "division by zero",
     "debug",
     "non-maskable interrupt",

@@ -11,7 +11,7 @@ void scroll()
     if (csr_y >= 25)
     {
         temp = csr_y - 25 + 1;
-        memcpy((char *)textmemptr, (char *)(textmemptr + temp * 80), (25 - temp) * 80 * 2);
+        memcpy((unsigned char *)textmemptr, (unsigned char *)(textmemptr + temp * 80), (25 - temp) * 80 * 2);
         memsetw(textmemptr + (25 - temp) * 80, blank, 80);
         csr_y = 25 - 1;
     }
@@ -42,7 +42,7 @@ void cls()
     move_csr();
 }
 
-void putch(unsigned char c)
+void putch(char c)
 {
     unsigned short *where;
     unsigned att = attrib << 8;
@@ -79,7 +79,7 @@ void putch(unsigned char c)
     move_csr();
 }
 
-void puts(unsigned char *text)
+void puts(char *text)
 {
     int i;
     int len = strlen(text);
